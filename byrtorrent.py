@@ -103,7 +103,7 @@ def download_torrent(torrents):
     with open(filename, "wb") as f:
         f.write(r.content)
 
-    os.startfile(filename)
+    os.startfile(os.getcwd() + filename)
 
 
 def main():
