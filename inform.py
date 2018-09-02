@@ -31,12 +31,13 @@ def inform_email(torrent):
     body = """
     您好, BYRBT有最新的免费种子上传啦，赶紧去下载吧！！！</br>
     <h3>种子信息</h3>
-    <p><strong>标题</strong>{title}</p>
-    <p><strong>大小</strong>{size}</p>
-    <p><strong>种子数</strong>{seeders_num}</p>
-    <p><strong>下载数</strong>{leechers_num}</p>
-    <p><strong>下载链接</strong><a href='{download_url}'>点击下载种子文件</a></p>
-    """.format(torrent.title, torrent.file_size, torrent.seeders_num, torrent.leechers_num, torrent.download_url)
+    <p><strong>标题:</strong>{title}</p>
+    <p><strong>大小:</strong>{size}</p>
+    <p><strong>种子数:</strong>{seeders_num}</p>
+    <p><strong>下载数:</strong>{leechers_num}</p>
+    <p><strong>下载链接:</strong><a href='{download_url}'>点击下载种子文件</a></p>
+    """.format(title=torrent.title, size=torrent.file_size, seeders_num=torrent.seeders_num,
+               leechers_num=torrent.leechers_num, download_url=torrent.download_url)
     message = MIMEText(body, 'html', 'utf-8')  # 文本内容
     message['From'] = Header("Naihai<xxx@xxx.com>", 'utf-8')  # 发送者
     message['To'] = Header("xxx@xxx.com", 'utf-8')  # 接收者
