@@ -47,7 +47,10 @@ class Torrent(object):
             self.leechers_num = 0
         else:
             self.leechers_num = contents[9].b.a.contents[0]
-        self.snatched_num = contents[11].a.b.contents[0]
+        if contents[11].contents[0] == '0':
+            self.snatched_num = 0
+        else:
+            self.snatched_num = contents[11].a.b.contents[0]
 
 
 # 读取cookie信息 登录后使用F12审查元素获取cookie
@@ -95,7 +98,17 @@ def sort_torrents_list(torrents):
 
 # 下载文件并启动系统默认BT客户端打开该文件
 def download_torrent(torrents):
-    filename = "./data/seeds/[BYRBT]." + torrents.title + ".torrent"
+
+    title = str(torrents.title)
+    if len(title) >= 180:
+        title = title[0:179]
+        
+    remove_list = "?><\/:\"*|"
+    for ch in remove_list:
+        if ch in title:
+            title = title.replace(ch, "")
+    print(title)
+    filename = "./data/seeds/" + title + ".torrent"
 
     headers = {'User-Agent': 'Mozilla/5.0'}
     cookies = get_cookie()
