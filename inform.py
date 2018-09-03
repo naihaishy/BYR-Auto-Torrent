@@ -1,25 +1,30 @@
 # coding = utf-8
 
-import byrtorrent
 import time
+import torrent as byr
+
 
 '''
 北邮人PT种子上传通知脚本
-当有免费种子上传时第一时间通过email或者windows桌面notification通知
+当有免费种子上传时第一时间通过email或者windows桌面toast通知
 '''
 
 
-# 排序 获取最新的torrent
-def sort_torrents_list(torrents):
-    latest_time = 0.0
-    latest_torrent = None
-    for torrent in torrents:
-        ts = time.strptime(torrent.upload_time, "%Y-%m-%d %H:%M:%S")
-        time_staps = time.mktime(ts)
-        if time_staps > latest_time:
-            latest_time = time_staps
-            latest_torrent = torrent
-    return latest_torrent
+# 读取cookie信息 登录后使用F12审查元素获取cookie
+def get_cookie():
+    f = open(r'./data/cookies.txt', 'r')
+    cookies = {}
+    for line in f.read().split(';'):
+        name, value = line.strip().split('=', 1)
+        cookies[name] = value
+    return cookies
+
+
+# 获取50条免费的种子信息
+def get_torrents_list():
+    url = "https://bt.byr.cn/torrents.php?spstate=2"
+    cookies = get_cookie()
+    return byr.PageTorrents(url, cookies).parse()
 
 
 # 通知
@@ -47,7 +52,7 @@ def inform_email(torrent):
     smtp = smtplib.SMTP_SSL(host="smtp.xxx.com", port="465")
 
     try:
-        smtp.login("xxx@xxx.com", "xxxxxx")
+        smtp.login("xx@xx.com", "xxx")
         print("登录成功")
     except smtplib.SMTPException:
         print("登录失败")
@@ -65,19 +70,31 @@ def inform_windows(torrent):
     from win10toast import ToastNotifier
     toaster = ToastNotifier()
     toaster.show_toast("BYRBT免费种子上传通知",
-                       "有人上传了最新了免费种子",
+                       "有人上传了最新了免费种子{title}".format(title=torrent.title),
                        icon_path="./data/favicon.ico",
                        duration=10,
                        threaded=True)
 
 
-
 def main():
-    torrents = byrtorrent.get_torrents_list()
-    latest_torrent = sort_torrents_list(torrents)
-    inform_email(latest_torrent)
-    # inform_windows()
+    print("开启检测BYT " + str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+
+    torrents = get_torrents_list()
+    byr.BYRTorrents.sort_by_time(torrents, True)   # 最新的一个免费种子
+
+    latest_torrent = torrents[0]
+    # 转成时间戳
+    ts = time.strptime(latest_torrent.upload_time, "%Y-%m-%d %H:%M:%S")
+    time_staps = time.mktime(ts)
+
+    # 在程序sleep期间内产生的torrent
+    if time.time() - time_staps < 60 * 5:
+        inform_email(latest_torrent)
+        inform_windows(latest_torrent)
 
 
 if __name__ == '__main__':
-    main()
+    # 每60s运行一次
+    while 1:
+        main()
+        time.sleep(60 * 5)

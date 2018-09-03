@@ -24,5 +24,9 @@
 
 
 5. 脚本inform.py用于新种子上传通知
-当有免费种子上传时第一时间通过email或者windows桌面notification通知
+当有免费种子上传时第一时间通过email或者windows桌面toast通知
+
+6. download.py用于下载最新的种子
+
+
 
