@@ -4,6 +4,7 @@
 ### 依赖库
     requests
     BeautifulSoup
+	pywin32
 
 
 ### 使用说明
