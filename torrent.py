@@ -85,10 +85,10 @@ class Torrent(object):
             # case 2
             self.snatched_num = int(str(contents[11].a.b.contents[0]).replace(",", ""))
 
-    def upload_time(self):
+    def time(self):
         return time.mktime(time.strptime(self.upload_time, "%Y-%m-%d %H:%M:%S"))
 
-    def file_size(self):
+    def size(self):
         """最小单位为MB 最大单位为TB"""
         items = str(self.file_size).split(" ")
         if items[1] == 'TB':
@@ -106,6 +106,14 @@ class Torrent(object):
 
     def snatchers(self):
         return self.snatched_num
+
+    def seed_rate(self):
+        if self.seeders_num is 0:
+            return 9999.9
+        elif self.seeders_num <= 3 and self.leechers_num == 0:
+            return 8888.8
+        else:
+            return self.leechers_num/float(self.seeders_num)
 
 
 """
@@ -156,12 +164,12 @@ class BYRTorrents(object):
     @staticmethod
     def sort_by_time(torrents, reverse=False):
         """根据上传时间排序 默认升序"""
-        torrents.sort(key=Torrent.upload_time, reverse=reverse)
+        torrents.sort(key=Torrent.time, reverse=reverse)
 
     @staticmethod
     def sort_by_size(torrents, reverse=False):
         """根据文件大小排序 默认升序"""
-        torrents.sort(key=Torrent.file_size, reverse=reverse)
+        torrents.sort(key=Torrent.size, reverse=reverse)
 
     @staticmethod
     def sort_by_seeders(torrents, reverse=False):
@@ -177,6 +185,11 @@ class BYRTorrents(object):
     def sort_by_snatchers(torrents, reverse=False):
         """根据完成种子数目排序 默认升序"""
         torrents.sort(key=Torrent.snatchers, reverse=reverse)
+
+    @staticmethod
+    def sort_by_seed_rate(torrents, reverse=False):
+        """根据下载数与种子数比例排序 默认升序"""
+        torrents.sort(key=Torrent.seed_rate, reverse=reverse)
 
 
 """

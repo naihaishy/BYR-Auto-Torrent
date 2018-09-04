@@ -6,8 +6,8 @@ import time
 import torrent as byr
 import win32api
 import win32con
-import win32gui
-from ctypes import *
+import ctypes
+import platform
 
 '''
 北邮人PT自动下载脚本
@@ -62,21 +62,10 @@ def save_down_log(seed_id):
             f.close()
 
 
-# 排序 获取最佳的seed_torrent 最佳策略为:时间最新
+# 排序 获取最佳的seed_torrent 最佳策略为:时间最新->种子数最少->下载数最多
 def sort_torrents_list(torrents):
-    latest_time = 0.0
-    latest_torrent = None
-    downed_lines = view_down_log()
-    print(downed_lines)
-    for torrent in torrents:
-        if downed_lines is not None and torrent.seed_id in downed_lines:
-            continue
-        ts = time.strptime(torrent.upload_time, "%Y-%m-%d %H:%M:%S")
-        time_staps = time.mktime(ts)
-        if time_staps > latest_time:
-            latest_time = time_staps
-            latest_torrent = torrent
-    return latest_torrent
+    byr.BYRTorrents.sort_by_size(torrents, True)
+    return torrents[0]
 
 
 # 下载文件并启动系统默认BT客户端打开该文件
@@ -114,13 +103,41 @@ def download_torrent(torrent):
     save_down_log(torrent.seed_id)
 
 
+# 获取某个磁盘的剩余空间大小
+def get_free_space_gb(folder):
+    """ Return folder/drive free space (in bytes)
+    """
+    if platform.system() == 'Windows':
+        free_bytes = ctypes.c_ulonglong(0)
+        ctypes.windll.kernel32.GetDiskFreeSpaceExW(ctypes.c_wchar_p(folder), None, None, ctypes.pointer(free_bytes))
+        return free_bytes.value/1024/1024/1024
+    else:
+        st = os.statvfs(folder)
+        return st.f_bavail * st.f_frsize/1024/1024
+
+
 def main():
     torrents = get_torrents_list()
     latest_torrent = sort_torrents_list(torrents)
+
+    print("最佳种子id为: " + str(latest_torrent.seed_id) + " 种子数: " + str(latest_torrent.seeders_num)
+          + " 下载数: " + str(latest_torrent.leechers_num))
+
+    if latest_torrent.seed_rate() < 0.1:
+        print("下载做种比率太高,不下载")
+        return
+
+    # 磁盘空间
+    free_space = get_free_space_gb('P:\\')  # GB
+    if free_space < 30 and latest_torrent.size() > free_space*1024:
+        print("磁盘空间不足,不下载")
+        return
+
+    print("开始下载")
     download_torrent(latest_torrent)
 
 
 if __name__ == '__main__':
-
-
-    main()
+    while 1:
+        main()
+        time.sleep(60 * 10)
