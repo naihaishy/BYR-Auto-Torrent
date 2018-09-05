@@ -30,6 +30,7 @@ class Torrent(object):
         self.seeders_num = 0  # 做种数
         self.leechers_num = 0  # 下载数
         self.snatched_num = 0  # 完成数
+        self._red_seed = False  # 是否是红色种子
 
     def parse(self):
         contents = self._content.contents
@@ -58,6 +59,7 @@ class Torrent(object):
         if str(contents[7].contents[0]).find("pan") == 2:
             # case 2
             self.seeders_num = 0
+            self._red_seed = True  # 大量下载但是种子不足时显示为红色
         elif str(contents[7].b.a.contents[0]).find("ont") == 2:
             # case 1
             self.seeders_num = int(str(contents[7].b.a.font.contents[0]).replace(",", ""))  # 三位计数转换为int 1,234=>1234
@@ -110,7 +112,7 @@ class Torrent(object):
     def seed_rate(self):
         if self.seeders_num is 0:
             return 9999.9
-        elif self.seeders_num <= 3 and self.leechers_num == 0:
+        elif self._red_seed:
             return 8888.8
         else:
             return self.leechers_num/float(self.seeders_num)

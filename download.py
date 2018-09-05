@@ -41,6 +41,7 @@ def view_down_log():
     else:
         with open("./data/index.json", "r") as f:
             lines = f.readlines()
+
             log_lines = [line.replace("\n", "") for line in lines]
             return log_lines
 
@@ -64,7 +65,7 @@ def save_down_log(seed_id):
 
 # 排序 获取最佳的seed_torrent 最佳策略为:时间最新->种子数最少->下载数最多
 def sort_torrents_list(torrents):
-    byr.BYRTorrents.sort_by_size(torrents, True)
+    byr.BYRTorrents.sort_by_seed_rate(torrents, True)
     return torrents[0]
 
 
