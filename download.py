@@ -117,28 +117,72 @@ def get_free_space_gb(folder):
         return st.f_bavail * st.f_frsize/1024/1024
 
 
-def main():
+# 该函数依赖库有win10toast和pypiwin32
+def inform_windows(torrent):
+    from win10toast import ToastNotifier
+    toaster = ToastNotifier()
+    toaster.show_toast("BYRBT免费种子上传通知",
+                       "有人上传了最新了免费种子{title}".format(title=torrent.title),
+                       icon_path="./data/favicon.ico",
+                       duration=30,
+                       threaded=True)
+
+
+def other():
     torrents = get_torrents_list()
-    latest_torrent = sort_torrents_list(torrents)
+    if torrents is None:
+        print("没有获取任何种子...")
+        return
+    byr.BYRTorrents.sort_by_time(torrents, True)
 
-    print("最佳种子id为: " + str(latest_torrent.seed_id) + " 种子数: " + str(latest_torrent.seeders_num)
-          + " 下载数: " + str(latest_torrent.leechers_num))
+    latest_torrent = torrents[0]  # 最新的一个免费种子
 
-    if latest_torrent.seed_rate() < 0.1:
-        print("下载做种比率太高,不下载")
+    # 在5分钟内产生的免费torrent
+    if time.time() - latest_torrent.time() < 60 * 5:
+        print("最佳种子id为: " + str(latest_torrent.seed_id) + " 种子数: " + str(latest_torrent.seeders_num)
+              + " 下载数: " + str(latest_torrent.leechers_num))
+
+        if latest_torrent.seed_rate() < 0.1:
+            print("下载做种比率太高,不下载")
+            return
+
+        # 磁盘空间
+        free_space = get_free_space_gb('P:\\')  # GB
+        if free_space < 30 and latest_torrent.size() > free_space * 1024:
+            print("磁盘空间不足,不下载")
+            return
+
+        print("开始下载")
+        download_torrent(latest_torrent)
+
+
+def main():
+    print("开启检测BYT " + str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+
+    torrents = get_torrents_list()
+
+    if torrents is None:
+        print("没有获取任何种子...")
         return
 
-    # 磁盘空间
-    free_space = get_free_space_gb('P:\\')  # GB
-    if free_space < 30 and latest_torrent.size() > free_space*1024:
-        print("磁盘空间不足,不下载")
-        return
+    byr.BYRTorrents.sort_by_time(torrents, True)
 
-    print("开始下载")
-    download_torrent(latest_torrent)
+    latest_torrent = torrents[0]  # 最新的一个免费种子
+
+    # 在5分钟内产生的免费torrent
+    if time.time() - latest_torrent.time() < 60 * 2:
+        inform_windows(latest_torrent)
+
+        # 磁盘空间
+        free_space = get_free_space_gb('P:\\')  # GB
+        if free_space < 30 and latest_torrent.size() > free_space*1024:
+            print("磁盘空间不足,不下载")
+            return
+        print("开始下载")
+        download_torrent(latest_torrent)
 
 
 if __name__ == '__main__':
     while 1:
         main()
-        time.sleep(60 * 10)
+        time.sleep(60 * 1)

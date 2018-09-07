@@ -138,8 +138,12 @@ class PageTorrents(object):
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                                  'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'}
+        try:
+            response = requests.get(url=self.url, headers=headers, cookies=self.cookie)
+        except requests.exceptions.ConnectionError:
+            print("网络连接错误...")
+            return
 
-        response = requests.get(url=self.url, headers=headers, cookies=self.cookie)
         soup = BeautifulSoup(response.text, 'html.parser')
 
         items = soup.find(attrs={"class": "torrents"}).contents[0].find_all("tr", recursive=False)[1:]
