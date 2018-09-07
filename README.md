@@ -28,8 +28,8 @@
 当有免费种子上传时第一时间通过email或者windows桌面toast通知
 
 
-6. download.py用于下载最新的种子
-其他BT客户端也可
+6. download.py用于下载最新的种子并且通过windows桌面toast通知
+
 ![脚本inform与download演示](https://raw.githubusercontent.com/naihaishy/BYR-Auto-Torrent/master/bb.png "inform_download.png")
 
 
