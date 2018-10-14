@@ -104,9 +104,9 @@ def download_torrent(torrent):
     save_down_log(torrent.seed_id)
 
 
-# 获取某个磁盘的剩余空间大小
+# 获取某个磁盘的剩余空间大小 GB
 def get_free_space_gb(folder):
-    """ Return folder/drive free space (in bytes)
+    """ Return folder/drive free space (in GB)
     """
     if platform.system() == 'Windows':
         free_bytes = ctypes.c_ulonglong(0)
@@ -148,7 +148,7 @@ def other():
 
         # 磁盘空间
         free_space = get_free_space_gb('P:\\')  # GB
-        if free_space < 30 and latest_torrent.size() > free_space * 1024:
+        if free_space < 30 or latest_torrent.size() > free_space * 1024:
             print("磁盘空间不足,不下载")
             return
 
@@ -175,7 +175,7 @@ def main():
 
         # 磁盘空间
         free_space = get_free_space_gb('P:\\')  # GB
-        if free_space < 30 and latest_torrent.size() > free_space*1024:
+        if free_space < 30 or latest_torrent.size() > free_space*1024:
             print("磁盘空间不足,不下载")
             return
         print("开始下载")

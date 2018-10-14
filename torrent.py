@@ -146,6 +146,10 @@ class PageTorrents(object):
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
+        if soup.find(attrs={"class": "torrents"}) is None:
+            print("页面解析错误...")
+            return None
+
         items = soup.find(attrs={"class": "torrents"}).contents[0].find_all("tr", recursive=False)[1:]
 
         torrents = []
