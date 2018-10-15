@@ -76,7 +76,9 @@ def download_torrent(torrent):
     title = str(torrent.title)
     if len(title) >= 180:
         title = title[0:179]
-
+    path = ".\\data\\seeds"
+    if not os.path.exists(path):
+        os.mkdir(path)
     remove_list = "?><\/:\"*|"
     for ch in remove_list:
         if ch in title:
