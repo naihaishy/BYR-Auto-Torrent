@@ -7,7 +7,8 @@
     requests
     BeautifulSoup
 	pywin32
-
+	win10toast
+	
 ### 使用说明
 
 #### 1. 登录北邮人BT
