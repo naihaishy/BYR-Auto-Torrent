@@ -76,14 +76,14 @@ def download_torrent(torrent):
     title = str(torrent.title)
     if len(title) >= 180:
         title = title[0:179]
-    path = ".\\data\\seeds"
+    path = "./data/seeds/"
     if not os.path.exists(path):
         os.mkdir(path)
     remove_list = "?><\/:\"*|"
     for ch in remove_list:
         if ch in title:
             title = title.replace(ch, "")
-    filename = "./data/seeds/" + title + ".torrent"
+    filename = path + title + ".torrent"
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                              'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
